@@ -104,9 +104,90 @@
     #announcement-rank { font-size: 4rem; } #announcement-name { font-size: 2.5rem; } #announcement-details { font-size: 1.2rem; }
     #announcement-content .winner-title { font-size: 4rem; } #announcement-content .winner-name { font-size: 2.5rem; }
     }
+
+    /* Help Button Styles */
+    .help-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        background-color: #1e3a8a;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+        cursor: pointer;
+        z-index: 1000;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        transition: transform 0.2s;
+    }
+    .help-btn:hover { transform: scale(1.1); }
+
+    /* Help Modal Adjustment */
+    .help-modal-content {
+        max-width: 800px !important;
+        width: 95% !important;
+        line-height: 1.6;
+    }
+    .help-text-body {
+        text-align: left;
+        font-size: 0.9rem;
+        color: #374151;
+        overflow-x: auto;
+    }
+    .help-text-body h1 { font-size: 1.5rem; margin-top: 0; }
+    .help-text-body h2 { font-size: 1.2rem; margin-top: 1.5rem; border-bottom: 1px solid #e5e7eb; }
+    .help-text-body h3 { font-size: 1rem; margin-top: 1rem; color: #1e40af; }
+    .help-text-body code { background: #f3f4f6; padding: 2px 4px; border-radius: 4px; font-family: monospace; }
+    .help-text-body hr { border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0; }
   </style>
 </head>
 <body>
+  <div class="help-btn" onclick="openHelpModal()">?</div>
+  <!-- ヘルプの内容 -->
+  <div id="help-modal" class="modal-overlay" style="display:none;" onclick="closeHelpModal(event)">
+      <div class="modal-content help-modal-content" onclick="event.stopPropagation()">
+          <div class="help-text-body">
+              <h1>🏆 Swiss-system-tournament</h1>
+              <p>スイスドロー形式のトーナメント用ペアリングスクリプトです。https://note.com/ictlink/n/nd24f2b3d0492 様のスイスドロースクリプトをプロトタイプとして使用させていただきました。</p>
+              
+              <hr>
+              <h2>📖 使用方法</h2>
+              <h3>PC</h3>
+              <p>ファイルをブラウザにドラッグ＆ドロップして起動します。</p>
+              <h3>スマホ</h3>
+              <p>GitHub PagesのURL https://grimoire-4hobby.github.io/Swiss-system-tournament/ をブラウザで開き、「ホーム画面に追加」して使用することを推奨します。</p>
+              <p>※LocalStorageを使用するためオフライン実行可能ですが、重要なデータは「JSONエクスポート」でバックアップしてください。</p>
+
+              <hr>
+              <h2>🛠 使い方</h2>
+              <h3>1. 準備</h3>
+              <p>大会名、勝ち点（デフォルト3）、引分点（デフォルト1）を設定します。Bonus/Reliefを有効にすると、特定の条件下での追加点・救済点を管理できます。大会ロゴ画像を設定すると順位表の背景に反映されます。</p>
+              <h3>2. ラウンド進行</h3>
+              <p>ペアリングに従い対戦し、勝者をタップして結果を入力します。棄権者が出た場合は順位表で「棄権」を押し、再度ペアリングを生成してください。</p>
+              <h3>3. 終了と発表</h3>
+              <p>数学的な必要最小ラウンド数（⌈log<sub>2</sub> n⌉）を超えると終了ボタンが表示されます。規定ラウンド後もマッチングを続行することは可能ですが、やむを得ず再戦が発生する可能性が上がります。終了後は下位から順にランクが発表される演出が始まります。</p>
+
+              <hr>
+              <h2>🔍 仕様</h2>
+              <h3>マッチング</h3>
+              <p>勝ち点が近い者同士を優先し、20パターンの試行から「点数差の合計」と「再戦ペナルティ」が最小のものを採用します。人数が奇数の場合、不戦勝はシード未経験かつ低スコアの人が優先されます。</p>
+              <h3>タイブレーカー (OMWP / OOMWP)</h3>
+              <p>同点時の順位決定に、対戦相手の平均勝率（OMWP）を使用します。極端な影響を避けるため25%〜75%で補正されます。さらに同点の場合は対戦相手のOMWP平均（OOMWP）を比較します。</p>
+              <h3>スコアボード画像</h3>
+              <p>順位、スコア、Promotion（前ラウンドからの増加分）等が表示されます。下位n名の匿名化が可能ですが、棄権者は匿名化されません。</p>
+
+              <hr>
+              <p>詳しくはhttps://github.com/Grimoire-4hobby/Swiss-system-tournament のREADMEを参照してください。</p>
+          </div>
+          <button class="btn-secondary" style="width:100%; margin-top:1.5rem;" onclick="closeHelpModal()">閉じる</button>
+      </div>
+  </div>
+
   <div class="container" id="app-container">
     <h1 id="tournament-name-display"></h1>
 
@@ -1209,6 +1290,14 @@
         link.download = `${tournamentName}_R${state.currentRound}_result.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
+    }
+
+    function openHelpModal() {
+        document.getElementById('help-modal').style.display = 'flex';
+    }
+
+    function closeHelpModal(e) {
+        document.getElementById('help-modal').style.display = 'none';
     }
   </script>
 </body>
